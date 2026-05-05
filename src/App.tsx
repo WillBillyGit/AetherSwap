@@ -146,20 +146,21 @@ export default function App() {
   return (
     <div 
       id="mystic-swap-root"
-      className="min-h-screen w-full flex flex-col items-center justify-center relative bg-[#0A0510] font-sans overflow-y-auto"
+      className="min-h-screen w-full bg-slate-900 text-white flex flex-col items-center justify-start py-10 relative overflow-x-hidden"
     >
-      <div className="fixed top-0 left-0 w-full bg-red-600 text-white text-[10px] z-[9999] text-center font-bold">
-        MYSTIC SWAP IS LIVE
+      {/* Visibility Indicator */}
+      <div className="fixed top-0 left-0 w-full bg-yellow-400 text-black text-[12px] z-[9999] text-center font-bold py-2 border-b-2 border-black">
+        PORTAL ACTIVE: IF YOU CAN SEE THIS YELLOW BAR, THE APP IS WORKING
       </div>
 
-      {/* Background Decor - Hidden temporarily */}
-
-
-      {/* Background Pattern - Mystical Grid */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none" 
+      {/* Simplified Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#1a1025] to-[#0A0510] pointer-events-none" />
+      
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none" 
         style={{ 
           backgroundImage: `radial-gradient(#B794F4 1px, transparent 1px)`, 
-          backgroundSize: '40px 40px' 
+          backgroundSize: '30px 30px' 
         }} 
       />
 
@@ -174,63 +175,38 @@ export default function App() {
 
 
       {/* Navbar Header */}
-      <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-30">
+      <header className="w-full max-w-7xl px-6 py-6 flex justify-between items-center z-30 relative bg-black/20 backdrop-blur-sm border-b border-white/5 mb-10">
         <div className="flex items-center gap-3">
-          <div className="bg-magic-purple/30 p-2.5 rounded-2xl border border-white/20 backdrop-blur-md">
-            <FlaskConical className="text-white drop-shadow-sm" size={28} />
+          <div className="bg-magic-purple/30 p-2 rounded-xl border border-white/20">
+            <FlaskConical size={24} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight drop-shadow-md">Mystic Swap</h1>
-            <p className="text-[10px] font-bold text-magic-pink uppercase tracking-[0.3em]">Mystical Dex Engine</p>
+            <h1 className="text-xl font-bold tracking-tight">Mystic Swap</h1>
+            <p className="text-[10px] text-magic-pink uppercase tracking-widest">Base Alchemist</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 shadow-2xl">
-          <button className="hidden md:flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-2xl border border-white/20 backdrop-blur-md transition-all">
-            <History size={18} className="text-purple-200" />
-            <span className="text-sm font-medium text-white">Records</span>
-          </button>
+        <div className="flex items-center gap-3">
           <button 
             onClick={() => {
-              if (isConnected) {
-                disconnect();
-              } else {
-                console.log("Attempting to connect soul...");
-                if (connectors.length === 0) {
-                  alert("No mystical portals (wallets) found in this realm. Please ensure a wallet extension is active.");
-                  return;
-                }
-                const connector = connectors.find(c => c.id === 'injected') || connectors[0];
-                connect({ connector });
+              if (isConnected) disconnect();
+              else {
+                const connector = connectors[0];
+                if (connector) connect({ connector });
               }
             }}
-            disabled={isConnecting || status === 'pending'}
-            className="flex items-center gap-2 bg-gradient-to-r from-magic-purple to-magic-pink px-5 py-2.5 rounded-2xl border border-white/30 text-white font-bold shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl border border-white/10 text-sm font-bold transition-all"
           >
-            <Wallet size={18} className={isConnecting ? 'animate-bounce' : ''} />
-            <span className="text-sm">
-              {isConnecting ? 'Summoning...' : (isConnected ? `${address?.slice(0, 6)}...${address?.slice(-4)}` : 'Connect Soul')}
-            </span>
+            {isConnected ? `${address?.slice(0, 6)}...` : 'Connect'}
           </button>
-          
-          {isConnected && chainId !== 1 && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              onClick={() => switchChain?.({ chainId: 1 })}
-              className="bg-red-500/20 hover:bg-red-500/30 text-red-200 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-red-500/30 backdrop-blur-md"
-            >
-              Switch to Mainnet
-            </motion.button>
-          )}
         </div>
-      </div>
+      </header>
 
       {/* The Mystic Mixer Centerpiece */}
       <div 
         className="relative z-20 w-full max-w-md mx-4 my-20"
       >
 
-        <div className="magic-glass rounded-[2rem] p-7 md:p-9 relative border border-white/30 ring-1 ring-black/5 shadow-2xl">
+        <div className="bg-[#1A1025] rounded-[2rem] p-7 md:p-9 relative border border-white/10 shadow-2xl">
 
           {/* Internal Glow Decor */}
           <div className="absolute -top-10 -right-10 w-32 h-32 bg-magic-pink/20 rounded-full blur-3xl pointer-events-none" />
