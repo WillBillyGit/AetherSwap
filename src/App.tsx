@@ -5,6 +5,8 @@
 
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect, useCallback } from "react";
+import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi';
+import { injected } from 'wagmi/connectors';
 import { 
   Sparkles, 
   Moon, 
@@ -32,6 +34,28 @@ const ESSENCES = [
 ];
 
 export default function App() {
+  const { address, isConnected, isConnecting, chainId } = useAccount();
+  const { connect, connectors, error: connectError, status } = useConnect();
+  const { disconnect } = useDisconnect();
+  const { switchChain } = useSwitchChain();
+
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    if (connectError) {
+      console.error("Alchemy Connection Error:", connectError);
+      // Only alert on explicit errors, not just cancellations if possible
+      if (!connectError.message.toLowerCase().includes('user rejected')) {
+        alert(`The mystical connection was interrupted: ${connectError.message}`);
+      }
+    }
+  }, [connectError]);
+
+  // Debugging log to see what connectors are available
+  useEffect(() => {
+    console.log("Available Alchemical Portals (Connectors):", connectors.map(c => c.name));
+  }, [connectors]);
+
   const [fromEssence, setFromEssence] = useState(ESSENCES[0]);
   const [toEssence, setToEssence] = useState(ESSENCES[1]);
   const [amount, setAmount] = useState("");
@@ -77,7 +101,7 @@ export default function App() {
       
       setQuoteAmount((parseFloat(amount) * rate * 0.995).toFixed(6)); // 0.5% slippage/magic tax
     } catch (error) {
-      console.error("Aether failed:", error);
+      console.error("Mystic failed:", error);
     } finally {
       setLoadingQuote(false);
     }
@@ -90,6 +114,10 @@ export default function App() {
 
   const handleMix = () => {
     if (!amount) return;
+    if (!isConnected) {
+      alert("Please connect your soul (wallet) before transmuted ingredients.");
+      return;
+    }
     setIsMixing(true);
     setTimeout(() => {
       setIsMixing(false);
@@ -107,16 +135,26 @@ export default function App() {
 
   const dodoWidgetUrl = `https://app.dodoex.io/widget?network=mainnet&from=${fromEssence.address}&to=${toEssence.address}&theme=dark&apikey=e39c3b4106d07edaa1&referral=0xE46ab5f9092350F55D12f0Cf346D4e6017C875f2&feeRate=0.0018`;
 
+  useEffect(() => {
+    console.log("Mystic Swap Heartbeat: Component Mounted");
+    const interval = setInterval(() => {
+      console.log("Mystic Swap Heartbeat: Alive at " + new Date().toLocaleTimeString());
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div 
-      className="min-h-screen w-full flex items-center justify-center relative overflow-hidden font-sans"
-      style={{
-        background: 'radial-gradient(circle at center, #1A1025 0%, #0A0510 100%)',
-        backgroundImage: `url('/input_file_1.png')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      id="mystic-swap-root"
+      className="min-h-screen w-full flex flex-col items-center justify-center relative bg-[#0A0510] font-sans overflow-y-auto"
     >
+      <div className="fixed top-0 left-0 w-full bg-red-600 text-white text-[10px] z-[9999] text-center font-bold">
+        MYSTIC SWAP IS LIVE
+      </div>
+
+      {/* Background Decor - Hidden temporarily */}
+
+
       {/* Background Pattern - Mystical Grid */}
       <div className="absolute inset-0 opacity-10 pointer-events-none" 
         style={{ 
@@ -128,64 +166,12 @@ export default function App() {
       {/* Mystical Overlay */}
       <div className="absolute inset-0 bg-[#1A1025]/40 backdrop-brightness-75 pointer-events-none" />
 
-      {/* Floating Magic Assets */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(30)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute"
-            initial={{ 
-              x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000), 
-              y: (typeof window !== 'undefined' ? window.innerHeight : 1000) + 100,
-              opacity: 0 
-            }}
-            animate={{ 
-              y: -100,
-              opacity: [0, 0.4, 0],
-              rotate: [0, 360]
-            }}
-            transition={{ 
-              duration: 10 + Math.random() * 20, 
-              repeat: Infinity,
-              delay: Math.random() * 10
-            }}
-          >
-            {i % 4 === 0 ? <Sparkles size={16} className="text-magic-purple" /> :
-             i % 4 === 1 ? <Moon size={12} className="text-magic-pink" /> :
-             i % 4 === 2 ? <Gem size={14} className="text-magic-blue" /> :
-             <div className="w-1 h-1 bg-white rounded-full blur-[1px]" />}
-          </motion.div>
-        ))}
-      </div>
+      {/* Floating Magic Assets - Hidden temporarily */}
 
-      {/* Main Alchemist Mascot */}
-      <motion.div 
-        className="absolute bottom-[-5%] left-[-5%] w-[300px] md:w-[450px] z-10 pointer-events-none select-none"
-        initial={{ x: -200, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
-      >
-        <div className="relative group">
-          <img 
-            src="/wizard_sweeping_potion_labels.jpg" 
-            alt="Kawaii Alchemist" 
-            className="w-full h-auto animate-float drop-shadow-[0_0_35px_rgba(183,148,244,0.6)]"
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              // Hide broken image and show a mystical glow if missing
-              (e.target as HTMLImageElement).style.display = 'none';
-              const parent = (e.target as HTMLImageElement).parentElement;
-              if (parent) {
-                const fallback = document.createElement('div');
-                fallback.className = 'w-64 h-64 bg-magic-purple/20 rounded-full blur-[100px] animate-pulse';
-                parent.appendChild(fallback);
-              }
-            }}
-          />
-          {/* Constant magic circle behind mascot */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-magic-purple/10 rounded-full blur-[120px] pointer-events-none" />
-        </div>
-      </motion.div>
+
+      {/* Main Alchemist Mascot - Hidden temporarily for diagnosis */}
+      {/* <motion.div ... mascot code ... </motion.div> */}
+
 
       {/* Navbar Header */}
       <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-30">
@@ -194,7 +180,7 @@ export default function App() {
             <FlaskConical className="text-white drop-shadow-sm" size={28} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight drop-shadow-md">AetherSwap</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight drop-shadow-md">Mystic Swap</h1>
             <p className="text-[10px] font-bold text-magic-pink uppercase tracking-[0.3em]">Mystical Dex Engine</p>
           </div>
         </div>
@@ -203,21 +189,49 @@ export default function App() {
             <History size={18} className="text-purple-200" />
             <span className="text-sm font-medium text-white">Records</span>
           </button>
-          <button className="flex items-center gap-2 bg-gradient-to-r from-magic-purple to-magic-pink px-5 py-2.5 rounded-2xl border border-white/30 text-white font-bold shadow-lg hover:scale-105 active:scale-95 transition-all">
-            <Wallet size={18} />
-            <span className="text-sm">Connect Soul</span>
+          <button 
+            onClick={() => {
+              if (isConnected) {
+                disconnect();
+              } else {
+                console.log("Attempting to connect soul...");
+                if (connectors.length === 0) {
+                  alert("No mystical portals (wallets) found in this realm. Please ensure a wallet extension is active.");
+                  return;
+                }
+                const connector = connectors.find(c => c.id === 'injected') || connectors[0];
+                connect({ connector });
+              }
+            }}
+            disabled={isConnecting || status === 'pending'}
+            className="flex items-center gap-2 bg-gradient-to-r from-magic-purple to-magic-pink px-5 py-2.5 rounded-2xl border border-white/30 text-white font-bold shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Wallet size={18} className={isConnecting ? 'animate-bounce' : ''} />
+            <span className="text-sm">
+              {isConnecting ? 'Summoning...' : (isConnected ? `${address?.slice(0, 6)}...${address?.slice(-4)}` : 'Connect Soul')}
+            </span>
           </button>
+          
+          {isConnected && chainId !== 1 && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              onClick={() => switchChain?.({ chainId: 1 })}
+              className="bg-red-500/20 hover:bg-red-500/30 text-red-200 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-red-500/30 backdrop-blur-md"
+            >
+              Switch to Mainnet
+            </motion.button>
+          )}
         </div>
       </div>
 
-      {/* The Aether Mixer Centerpiece */}
-      <motion.div 
-        className="relative z-20 w-full max-w-md mx-4"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
+      {/* The Mystic Mixer Centerpiece */}
+      <div 
+        className="relative z-20 w-full max-w-md mx-4 my-20"
       >
-        <div className="magic-glass rounded-[2rem] p-7 md:p-9 relative border border-white/30 ring-1 ring-black/5 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]">
+
+        <div className="magic-glass rounded-[2rem] p-7 md:p-9 relative border border-white/30 ring-1 ring-black/5 shadow-2xl">
+
           {/* Internal Glow Decor */}
           <div className="absolute -top-10 -right-10 w-32 h-32 bg-magic-pink/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-magic-blue/20 rounded-full blur-3xl pointer-events-none" />
@@ -443,7 +457,8 @@ export default function App() {
              <div className="w-1.5 h-1.5 rounded-full bg-magic-blue animate-ping [animation-delay:0.6s]" />
           </div>
         </div>
-      </motion.div>
+      </div>
+
 
       {/* Side Decorative Elements: The High Alchemist's Props */}
       <div className="fixed top-1/2 left-6 -translate-y-1/2 hidden xl:flex flex-col gap-5 pointer-events-none opacity-20">
